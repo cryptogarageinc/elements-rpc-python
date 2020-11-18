@@ -1,0 +1,17 @@
+[dev-packages]
+autopep8 = "*"
+coverage = "*"
+flake8 = "*"
+
+[packages]
+python-bitcoinrpc = "*"
+
+[scripts]
+getnewaddress = "python elements-rpc.py getnewaddress"
+listunspent = "python elements-rpc.py listunspent"
+pip_install = "pip install"
+pip_list = "pip list"
+script = "python script.py "
+script3 = "python3 script.py "
+sign = "python elements-rpc.py sign"
+sign_tx = "python elements-rpc.py sign"
