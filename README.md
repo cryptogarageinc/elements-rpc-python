@@ -54,16 +54,12 @@ create configuration file on first.
 
 #### for windows
 
-```
 1. drag transaction file
 2. drop file to `3_sign_tx.bat`
-```
 
 Alternative:
-```
 1. rename transation file to `sign_tx.txt`
 2. double click `3_sign_tx.bat`
-```
 
 #### for pipenv
 
