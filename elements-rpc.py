@@ -11,6 +11,8 @@ from decimal import Decimal
 
 MIN_SUPPORTED_ELEMENTS_VERSION = 170001  # 0.17.0.1
 LISTUNSPENT_MAX = 9999999
+COINBASE = 100000000
+ASSET_LBTC = '6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d'
 
 
 class RpcWrapper:
@@ -48,6 +50,26 @@ class RpcWrapper:
     def getnewaddress(self, label, address_type):
         return self.rpc_connection.getnewaddress(label, address_type)
 
+    def getaddressesbylabel(self, label):
+        addresses = self.rpc_connection.getaddressesbylabel(label)
+        addr_list = []
+        if addresses:
+            for addr in addresses.keys():
+                addr_list.append(addr)
+        return addr_list
+
+    def getbalance(self, asset):
+        if asset:
+            balance = self.rpc_connection.getbalance('*', 0, False, asset)
+            balance_map = {asset: balance}
+        else:
+            balance_map = self.rpc_connection.getbalance()
+        return balance_map
+
+    def sendtoaddress(self, address, amount, asset):
+        return self.rpc_connection.sendtoaddress(
+            address, amount, '', '', False, False, 1, 'UNSET', asset)
+
     def getnetworkinfo(self):
         return self.rpc_connection.getnetworkinfo()
 
@@ -58,6 +80,17 @@ class RpcWrapper:
                 'Node version ({node_version:06}) not supported ' +
                 f'(min: {MIN_SUPPORTED_ELEMENTS_VERSION:06})')
             sys.exit(1)
+
+
+def convert_btc(amount):
+    amount_str = str(amount)
+    if len(amount_str) > 8:
+        num = len(amount_str) - 8
+        amount_str = amount_str[:num] + '.' + amount_str[num:]
+    else:
+        num = 8 - len(amount_str)
+        amount_str = '0.' + ('0' * num) + amount_str
+    return float(amount_str)
 
 
 def create_command():
@@ -75,17 +108,40 @@ def create_command():
 
     subparsers = parser.add_subparsers(dest='command', help='sub-command help')
     parser_addr = subparsers.add_parser(
-        'getnewaddress', help='getnewaddress help')
-    parser_addr.add_argument('-l', '--label', default='JPYS',
+        'get_address', help='get_address help')
+    parser_addr.add_argument('-l', '--label', default='',
                              help='Address label', required=False)
     parser_addr.add_argument('-t', '--address-type', default='bech32',
                              help='Address type', required=False)
-    parser_addr.add_argument('-o', '--output-file', default='address.txt',
+    parser_addr.add_argument('-o', '--output-file', default='',
                              help='output file name', required=False)
 
+    parser_list_addresses = subparsers.add_parser(
+        'list_addresses', help='list_addresses help')
+    parser_list_addresses.add_argument('-l', '--label', default='',
+                                       help='Address label', required=False)
+
+    parser_get_balance = subparsers.add_parser(
+        'get_balance', help='get_balance help')
+    parser_get_balance.add_argument('-a', '--asset', default='',
+                                    help='target asset', required=False)
+
     parser_list = subparsers.add_parser('listunspent', help='listunspent help')
+    parser_list.add_argument('-a', '--asset', default='',
+                             help='target asset', required=False)
     parser_list.add_argument('-o', '--output-file', default='listunspent.json',
                              help='output file name', required=False)
+
+    parser_send = subparsers.add_parser('send', help='send help')
+    parser_send.add_argument('-i', '--address',
+                             help='send address', required=True)
+    parser_send.add_argument('-a', '--asset',
+                             help='target asset', required=True)
+    parser_send.add_argument('-v', '--value',
+                             help='send value (sat)', required=True)
+    parser_send.add_argument('-o', '--output-file',
+                             default='last_send_txid.txt',
+                             help='output txid file name', required=False)
 
     parser_sign = subparsers.add_parser('sign', help='sign help')
     parser_sign.add_argument('-i', '--input-tx-file', default='sign_tx.txt',
@@ -113,24 +169,73 @@ def main():
     rpc = RpcWrapper(url=args.elements_url, config=config)
     rpc.check_version()
 
-    if args.command == 'getnewaddress':
+    if args.command == 'get_address':
         address = rpc.getnewaddress(args.label, args.address_type)
-        print(f'address: {address}')
+        print(f'Confidential address: {address}')
 
-        with open(args.output_file, 'w') as f:
-            f.write(address)
-            print(f'output: {args.output_file}')
+        if args.output_file:
+            with open(args.output_file, 'w') as f:
+                f.write(address)
+                print(f'output: {args.output_file}')
+
+    elif args.command == 'list_addresses':
+        addresses = rpc.getaddressesbylabel(args.label)
+        print(f'label: {args.label}')
+        if len(addresses) > 1:
+            print('addresses:')
+            for address in addresses:
+                print(f'- {address}')
+        elif len(addresses) == 1:
+            addr = addresses[0]
+            print(f'address: {addr}')
+
+    elif args.command == 'get_balance':
+        balance_map = rpc.getbalance(args.asset)
+        for label, balance in balance_map.items():
+            if label == 'bitcoin':
+                print(f'{label}: {balance}')
+            else:
+                amount = int(balance * COINBASE)
+                print(f'{label}: {amount}')
 
     elif args.command == 'listunspent':
         def convert_to_json(obj):
             return float(obj) if isinstance(obj, Decimal) else obj
 
         unspent_list = rpc.listunspent()
+        if args.asset:
+            utxo_list = [u for u in unspent_list if u['asset'] == args.asset]
+            unspent_list = utxo_list
         json_str = json.dumps(unspent_list,
                               default=convert_to_json, indent=2)
-        with open(args.output_file, 'w') as f:
-            f.write(json_str)
-            print(f'output: {args.output_file}')
+        if args.output_file:
+            with open(args.output_file, 'w') as f:
+                f.write(json_str)
+                print(f'output: {args.output_file}')
+        else:
+            print(json_str)
+
+    elif args.command == 'send':
+        if not args.address:
+            logging.error(' empty address.')
+        if not args.asset:
+            logging.error(' empty asset.')
+            sys.exit(1)
+        if args.value <= 0:
+            logging.error(' empty send value.')
+            sys.exit(1)
+
+        if args.asset in ['bitcoin', ASSET_LBTC]:
+            amount = float(args.value)
+        else:
+            amount = convert_btc(int(args.value))
+
+        txid = rpc.sendtoaddress(args.address, amount, args.asset)
+        print(f'txid: {txid}')
+        if args.output_file:
+            with open(args.output_file, 'w') as f:
+                f.write(txid)
+                print(f'output: {args.output_file}')
 
     elif args.command == 'sign':
         path = args.input_tx_file

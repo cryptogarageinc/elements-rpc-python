@@ -7,7 +7,7 @@ flake8 = "*"
 python-bitcoinrpc = "*"
 
 [scripts]
-getnewaddress = "python elements-rpc.py getnewaddress"
+get_address = "python elements-rpc.py get_address"
 listunspent = "python elements-rpc.py listunspent"
 pip_install = "pip install"
 pip_list = "pip list"

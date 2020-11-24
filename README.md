@@ -30,15 +30,15 @@ create configuration file on first.
   }
   ```
 
-### getnewaddress
+### get_address
 
 #### for windows
 
-1. double click `1_getnewaddress.bat`
+1. double click `1_get_address_jpy.bat`
 
 #### for pipenv
 
-1. pipenv run getnewaddress
+1. pipenv run get_address
 
 ### listunspent
 
