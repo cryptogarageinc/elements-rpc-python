@@ -99,6 +99,10 @@ def convert_btc(amount):
     return float(amount_str)
 
 
+def get_btc_asset(config):
+    return config.get('assets', {}).get('bitcoin', ASSET_LBTC)
+
+
 def get_passphrase(config, passphrase):
     result = config.get('elements', {}).get('passphrase', '')
     return result if result else passphrase
@@ -241,7 +245,8 @@ def main():
         if not args.asset:
             logging.error(' empty asset.')
             sys.exit(1)
-        is_btc = True if args.asset in ['bitcoin', ASSET_LBTC] else False
+        btc_asset = get_btc_asset(config)
+        is_btc = True if args.asset in ['bitcoin', btc_asset] else False
 
         if is_btc:
             amount = float(args.value)
