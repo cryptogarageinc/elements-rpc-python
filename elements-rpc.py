@@ -50,6 +50,9 @@ class RpcWrapper:
     def getnewaddress(self, label, address_type):
         return self.rpc_connection.getnewaddress(label, address_type)
 
+    def listlabels(self):
+        return self.rpc_connection.listlabels()
+
     def getaddressesbylabel(self, label):
         addresses = self.rpc_connection.getaddressesbylabel(label)
         addr_list = []
@@ -141,7 +144,7 @@ def create_command():
 
     parser_list_addresses = subparsers.add_parser(
         'list_addresses', help='list_addresses help')
-    parser_list_addresses.add_argument('-l', '--label', default='',
+    parser_list_addresses.add_argument('-l', '--label', default=None,
                                        help='Address label', required=False)
 
     parser_get_balance = subparsers.add_parser(
@@ -202,15 +205,21 @@ def main():
                 print(f'output: {args.output_file}')
 
     elif args.command == 'list_addresses':
-        addresses = rpc.getaddressesbylabel(args.label)
-        print(f'label: {args.label}')
-        if len(addresses) > 1:
-            print('addresses:')
-            for address in addresses:
-                print(f'- {address}')
-        elif len(addresses) == 1:
-            addr = addresses[0]
-            print(f'address: {addr}')
+        if args.label is None:
+            labels = rpc.listlabels()
+        else:
+            labels = [args.label]
+
+        for label in labels:
+            addresses = rpc.getaddressesbylabel(label)
+            print(f'label: {label}')
+            if len(addresses) > 1:
+                print('addresses:')
+                for address in addresses:
+                    print(f'- {address}')
+            elif len(addresses) == 1:
+                addr = addresses[0]
+                print(f'address: {addr}')
 
     elif args.command == 'get_balance':
         balance_map = rpc.getbalance(args.asset)
