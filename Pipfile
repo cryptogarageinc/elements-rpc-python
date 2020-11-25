@@ -8,7 +8,10 @@ python-bitcoinrpc = "*"
 
 [scripts]
 get_address = "python elements-rpc.py get_address"
+list_addresses = "python elements-rpc.py list_addresses"
+get_balance = "python elements-rpc.py get_balance"
 listunspent = "python elements-rpc.py listunspent"
+send = "python elements-rpc.py send"
 pip_install = "pip install"
 pip_list = "pip list"
 script = "python script.py "

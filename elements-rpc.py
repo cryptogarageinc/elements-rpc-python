@@ -221,14 +221,15 @@ def main():
         if not args.asset:
             logging.error(' empty asset.')
             sys.exit(1)
-        if args.value <= 0:
-            logging.error(' empty send value.')
-            sys.exit(1)
+        is_btc = True if args.asset in ['bitcoin', ASSET_LBTC] else False
 
-        if args.asset in ['bitcoin', ASSET_LBTC]:
+        if is_btc:
             amount = float(args.value)
         else:
             amount = convert_btc(int(args.value))
+        if amount <= 0:
+            logging.error(' empty send value.')
+            sys.exit(1)
 
         txid = rpc.sendtoaddress(args.address, amount, args.asset)
         print(f'txid: {txid}')
