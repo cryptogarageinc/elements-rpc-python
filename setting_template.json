@@ -4,6 +4,7 @@
     "port": "7041",
     "username": "",
     "password": "",
-    "wallet": ""
+    "wallet": "",
+    "passphrase": ""
   }
 }

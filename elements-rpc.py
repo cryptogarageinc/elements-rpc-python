@@ -70,6 +70,12 @@ class RpcWrapper:
         return self.rpc_connection.sendtoaddress(
             address, amount, '', '', False, False, 1, 'UNSET', asset)
 
+    def walletpassphrase(self, passphrase, timeout):
+        return self.rpc_connection.walletpassphrase(passphrase, timeout)
+
+    def walletlock(self):
+        return self.rpc_connection.walletlock()
+
     def getnetworkinfo(self):
         return self.rpc_connection.getnetworkinfo()
 
@@ -93,6 +99,11 @@ def convert_btc(amount):
     return float(amount_str)
 
 
+def get_passphrase(config, passphrase):
+    result = config.get('elements', {}).get('passphrase', '')
+    return result if result else passphrase
+
+
 def create_command():
     parser = argparse.ArgumentParser(
         description='Liquid Network Transaction Tool.')
@@ -107,6 +118,14 @@ def create_command():
                         help='configuration file.', required=False)
 
     subparsers = parser.add_subparsers(dest='command', help='sub-command help')
+
+    parser_unlock = subparsers.add_parser(
+        'unlock_wallet', help='unlock_wallet help')
+    parser_unlock.add_argument('-p', '--passphrase', default='', help='passphrase',
+                               required=False)
+
+    subparsers.add_parser('lock_wallet', help='lock_wallet help')
+
     parser_addr = subparsers.add_parser(
         'get_address', help='get_address help')
     parser_addr.add_argument('-l', '--label', default='',
@@ -218,6 +237,7 @@ def main():
     elif args.command == 'send':
         if not args.address:
             logging.error(' empty address.')
+            sys.exit(1)
         if not args.asset:
             logging.error(' empty asset.')
             sys.exit(1)
@@ -253,8 +273,21 @@ def main():
             f.write(signed_tx['hex'])
             print(f'output tx file: {output_path}')
 
+    elif args.command == 'lock_wallet':
+        rpc.walletlock()
+        print('lock wallet.')
+
+    elif args.command == 'unlock_wallet':
+        passphrase = get_passphrase(config, args.passphrase)
+        if not passphrase:
+            logging.error(' empty passphrase.')
+            sys.exit(1)
+
+        rpc.walletpassphrase(passphrase, (24 * 60 * 60))
+        print('unlock wallet. (timeout: 1 day)')
+
     else:
-        print('Unknown command: {args.command}')
+        print(f'Unknown command: {args.command}')
 
 
 if __name__ == '__main__':
