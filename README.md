@@ -25,7 +25,8 @@ create configuration file on first.
       "port": "(server port)",
       "username": "(server user id)",
       "password": "(server password)",
-      "wallet": "(wallet name)"
+      "wallet": "(wallet name)",
+      "passphrase": "(wallet passphrase)"
     }
   }
   ```
