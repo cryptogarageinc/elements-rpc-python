@@ -1,4 +1,4 @@
-#!/usr/bin/env pyhton3
+#!/usr/bin/env python3
 
 import argparse
 import json
@@ -128,8 +128,8 @@ def create_command():
 
     parser_unlock = subparsers.add_parser(
         'unlock_wallet', help='unlock_wallet help')
-    parser_unlock.add_argument('-p', '--passphrase', default='', help='passphrase',
-                               required=False)
+    parser_unlock.add_argument('-p', '--passphrase', default='',
+                               help='passphrase', required=False)
 
     subparsers.add_parser('lock_wallet', help='lock_wallet help')
 
