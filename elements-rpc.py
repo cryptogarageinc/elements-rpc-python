@@ -224,6 +224,7 @@ def main():
             elif len(addresses) == 1:
                 addr = addresses[0]
                 print(f'address: {addr}')
+            print('\n')
 
     elif args.command == 'get_balance':
         balance_map = rpc.getbalance(args.asset)
