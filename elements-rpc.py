@@ -106,6 +106,10 @@ def get_btc_asset(config):
     return config.get('assets', {}).get('bitcoin', ASSET_LBTC)
 
 
+def get_jpy_asset(config, default_value):
+    return config.get('assets', {}).get('JPY', default_value)
+
+
 def get_passphrase(config, passphrase):
     result = config.get('elements', {}).get('passphrase', '')
     return result if result else passphrase
@@ -234,10 +238,19 @@ def main():
         def convert_to_json(obj):
             return float(obj) if isinstance(obj, Decimal) else obj
 
+        asset = args.asset
+        if asset == 'JPY':
+            asset = get_jpy_asset(config, asset)
+            if (not asset) or (asset == 'JPY'):
+                print('The JPY asset is not defined on the config file.')
+                sys.exit(1)
+
         unspent_list = rpc.listunspent()
         if args.asset:
-            utxo_list = [u for u in unspent_list if u['asset'] == args.asset]
+            utxo_list = [u for u in unspent_list if u['asset'] == asset]
             unspent_list = utxo_list
+        utxo_count = len(utxo_list)
+        print(f'listunspent count: {utxo_count}')
         json_str = json.dumps(unspent_list,
                               default=convert_to_json, indent=2)
         if args.output_file:
@@ -257,6 +270,13 @@ def main():
         btc_asset = get_btc_asset(config)
         is_btc = True if args.asset in ['bitcoin', btc_asset] else False
 
+        asset = args.asset
+        if asset == 'JPY':
+            asset = get_jpy_asset(config, asset)
+            if (not asset) or (asset == 'JPY'):
+                print('The JPY asset is not defined on the config file.')
+                sys.exit(1)
+
         if is_btc:
             amount = float(args.value)
         else:
@@ -265,7 +285,7 @@ def main():
             logging.error(' empty send value.')
             sys.exit(1)
 
-        txid = rpc.sendtoaddress(args.address, amount, args.asset)
+        txid = rpc.sendtoaddress(args.address, amount, asset)
         print(f'txid: {txid}')
         if args.output_file:
             with open(args.output_file, 'w') as f:

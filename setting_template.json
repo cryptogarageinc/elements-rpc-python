@@ -6,5 +6,8 @@
     "password": "",
     "wallet": "",
     "passphrase": ""
+  },
+  "assets": {
+    "JPY": ""
   }
 }
