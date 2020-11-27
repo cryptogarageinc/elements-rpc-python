@@ -2,14 +2,19 @@
 
 ## install
 
-### for windows bat
+ - for windows bat
+   1. double click `0_install.bat`
 
-1. double click `0_install.bat`
+ - for python
+   ```
+    1. pip install --user python-bitcoinrpc
+   ```
 
-### for pipenv
-
-1. pip install --user pipenv
-2. pipenv install
+ - for pipenv
+   ```
+    1. pip install --user pipenv
+    2. pipenv install
+   ```
 
 ## usage
 
@@ -27,41 +32,114 @@ create configuration file on first.
       "password": "(server password)",
       "wallet": "(wallet name)",
       "passphrase": "(wallet passphrase)"
+    },
+    "assets": {
+      "JPY": "(JPY asset id)"
     }
   }
   ```
 
-### get_address
+- configuration
+  - elements: Settings for connecting to elements RPC server.
+    - host: host name or ip address.
+    - port: RPC port
+    - username: authentication username
+    - password: authentication password
+    - wallet: (If you are using multiple wallet) wallet name.
+    - passphrase: wallet passphrase. (for unlock_wallet)
+  - assets: default asset id. (and label mapping)
+    - JPY: JPY asset id.
 
-#### for windows
+### support command
 
-1. double click `1_get_address_jpy.bat`
 
-#### for pipenv
+  - usage of python
+    ```
+    (lock wallet)
+    python3 elements-rpc.py lock_wallet
 
-1. pipenv run get_address
+    (lock wallet)
+    python3 elements-rpc.py lock_wallet
 
-### listunspent
+    (unlock wallet)
+    python3 elements-rpc.py unlock_wallet [-p (passphrase)]
 
-#### for windows
+    (get address)
+    python3 elements-rpc.py get_address -l (label name)
 
-1. double click `2_listunspent.bat`
+    (list addresses)
+    python3 elements-rpc.py list_addresses -l (label name)
 
-#### for pipenv
+    (get balance)
+    python3 elements-rpc.py get_balance [-a (asset name)]
 
-1. pipenv run listunspent
+    (listunspent)
+    python3 elements-rpc.py listunspent -a (asset name) -o (output file name)
 
-### sign
+    (sign)
+    python3 elements-rpc.py sign -i (input tx file) -o (output signed tx file name)
 
-#### for windows
+    (send transaction)
+    python3 elements-rpc.py send --address (send address) -a (asset) -v (amount(sat))
+    ```
 
-1. drag transaction file
-2. drop file to `3_sign_tx.bat`
+  - usage of pipenv
+    ```
+    (lock wallet)
+    pipenv run lock_wallet
 
-Alternative:
-1. rename transation file to `sign_tx.txt`
-2. double click `3_sign_tx.bat`
+    (unlock wallet)
+    pipenv run unlock_wallet [-p (passphrase)]
 
-#### for pipenv
+    (get address)
+    pipenv run get_address -l (label name)
 
-1. pipenv run sign -i `filePath`
+    (list addresses)
+    pipenv run list_addresses -l (label name)
+
+    (get balance)
+    pipenv run get_balance [-a (asset name)]
+
+    (listunspent)
+    pipenv run listunspent -a (asset name) [-o (output file name)]
+
+    (sign)
+    pipenv run sign -i (input tx file) [-o (output signed tx file name)]
+
+    (send transaction)
+    pipenv run send --address (send address) -a (asset) -v (amount(sat))
+    ```
+
+
+### usage of windows bat file
+
+Parameter is set to default value.
+
+  - lock wallet
+    1. double click `99_lock_wallet.bat`
+
+  - unlock wallet
+    1. double click `98_unlock_wallet.bat`
+
+  - get address
+    1. double click `1_get_address_jpy.bat`
+
+  - list addresses
+    1. double click `2_list_addresses_jpy.bat`
+
+  - get balance
+    1. double click `3_get_balance.bat`
+
+  - listunspent (JPY asset)
+    1. double click `4_listunspent_jpy.bat`
+    2. view `listunspent-jpy.json`
+
+  - sign
+    1. drag transaction file
+    2. drop file to `3_sign_tx.bat`
+    3. view `sign_tx.txt`
+
+    Alternative:
+    1. rename transaction file to `sign_tx.txt`
+    2. double click `3_sign_tx.bat`
+    3. view `sign_tx.txt`
