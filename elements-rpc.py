@@ -230,7 +230,7 @@ def main():
         balance_map = rpc.getbalance(args.asset)
         for label, balance in balance_map.items():
             if label == 'bitcoin':
-                print(f'{label}: {balance}')
+                print(f'{label}: {balance:.8f}')
             else:
                 amount = int(balance * COINBASE)
                 print(f'{label}: {amount}')
