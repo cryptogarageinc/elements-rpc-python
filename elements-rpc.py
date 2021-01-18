@@ -76,6 +76,13 @@ class RpcWrapper:
     def walletpassphrase(self, passphrase, timeout):
         return self.rpc_connection.walletpassphrase(passphrase, timeout)
 
+    def walletpassphrasechange(self, passphrase, new_passphrase):
+        return self.rpc_connection.walletpassphrasechange(
+            passphrase, new_passphrase)
+
+    def encryptwallet(self, passphrase):
+        return self.rpc_connection.encryptwallet(passphrase)
+
     def walletlock(self):
         return self.rpc_connection.walletlock()
 
@@ -136,6 +143,13 @@ def create_command():
                                help='passphrase', required=False)
 
     subparsers.add_parser('lock_wallet', help='lock_wallet help')
+
+    parser_chg_pass = subparsers.add_parser(
+        'change_wallet_passphrase', help='unlock_wallet help')
+    parser_chg_pass.add_argument('-p', '--passphrase', default='',
+                                 help='old passphrase', required=False)
+    parser_chg_pass.add_argument('-n', '--new-passphrase',
+                                 help='new passphrase', required=True)
 
     parser_addr = subparsers.add_parser(
         'get_address', help='get_address help')
@@ -313,13 +327,24 @@ def main():
         print('lock wallet.')
 
     elif args.command == 'unlock_wallet':
-        passphrase = get_passphrase(config, args.passphrase)
-        if not passphrase:
-            logging.error(' empty passphrase.')
-            sys.exit(1)
+        if args.passphrase:
+            passphrase = args.passphrase
+        else:
+            passphrase = get_passphrase(config, args.passphrase)
+            if not passphrase:
+                logging.error(' empty passphrase.')
+                sys.exit(1)
 
         rpc.walletpassphrase(passphrase, (24 * 60 * 60))
         print('unlock wallet. (timeout: 1 day)')
+
+    elif args.command == 'change_wallet_passphrase':
+        if args.passphrase:
+            rpc.walletpassphrasechange(args.passphrase, args.new_passphrase)
+            print('change wallet passphrase.')
+        else:
+            rpc.encryptwallet(args.new_passphrase)
+            print('wallet encrypt.')
 
     else:
         print(f'Unknown command: {args.command}')

@@ -64,6 +64,9 @@ create configuration file on first.
     (unlock wallet)
     python3 elements-rpc.py unlock_wallet [-p (passphrase)]
 
+    (change wallet passphrase)
+    python3 elements-rpc.py change_wallet_passphrase -p (current passphrase) -n (new passphrase)
+
     (get address)
     python3 elements-rpc.py get_address -l (label name)
 
@@ -90,6 +93,9 @@ create configuration file on first.
 
     (unlock wallet)
     pipenv run unlock_wallet [-p (passphrase)]
+
+    (change wallet passphrase)
+    pipenv run change_wallet_passphrase -p (current passphrase) -n (new passphrase)
 
     (get address)
     pipenv run get_address -l (label name)
