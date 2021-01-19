@@ -58,9 +58,6 @@ create configuration file on first.
     (lock wallet)
     python3 elements-rpc.py lock_wallet
 
-    (lock wallet)
-    python3 elements-rpc.py lock_wallet
-
     (unlock wallet)
     python3 elements-rpc.py unlock_wallet [-p (passphrase)]
 
