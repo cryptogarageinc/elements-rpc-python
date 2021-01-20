@@ -69,6 +69,9 @@ class RpcWrapper:
             balance_map = self.rpc_connection.getbalance()
         return balance_map
 
+    def dumpassetlabels(self):
+        return self.rpc_connection.dumpassetlabels()
+
     def sendtoaddress(self, address, amount, asset):
         return self.rpc_connection.sendtoaddress(
             address, amount, '', '', False, False, 1, 'UNSET', asset)
@@ -113,8 +116,24 @@ def get_btc_asset(config):
     return config.get('assets', {}).get('bitcoin', ASSET_LBTC)
 
 
-def get_jpy_asset(config, default_value):
-    return config.get('assets', {}).get('JPY', default_value)
+def create_asset_label_map(rpc, config, full_get=False):
+    label_map = config.get('assets', {})
+    if not label_map:
+        label_map = rpc.dumpassetlabels()
+    elif full_get:
+        asset_list = rpc.dumpassetlabels()
+        label_map.update(asset_list)
+    if 'bitcoin' not in label_map:
+        label_map['bitcoin'] = ASSET_LBTC
+    return label_map
+
+
+def create_asset_map(rpc, config, full_get=False):
+    label_map = create_asset_label_map(rpc, config, full_get)
+    value_map = {}
+    for label, asset in label_map.items():
+        value_map[asset] = label
+    return label_map, value_map
 
 
 def get_passphrase(config, passphrase):
@@ -241,11 +260,13 @@ def main():
             print('\n')
 
     elif args.command == 'get_balance':
+        _, asset_map = create_asset_map(rpc, config)
         balance_map = rpc.getbalance(args.asset)
         for label, balance in balance_map.items():
             if label == 'bitcoin':
                 print(f'{label}: {balance:.8f}')
             else:
+                label = asset_map.get(label, label)
                 amount = int(balance * COINBASE)
                 print(f'{label}: {amount}')
 
@@ -253,18 +274,19 @@ def main():
         def convert_to_json(obj):
             return float(obj) if isinstance(obj, Decimal) else obj
 
+        asset_label_map, _ = create_asset_map(rpc, config, True)
         asset = args.asset
-        if asset == 'JPY':
-            asset = get_jpy_asset(config, asset)
-            if (not asset) or (asset == 'JPY'):
-                print('The JPY asset is not defined on the config file.')
-                sys.exit(1)
+        if asset in asset_label_map:
+            asset = asset_label_map.get(asset)
 
         unspent_list = rpc.listunspent()
         if args.asset:
-            utxo_list = [u for u in unspent_list if u['asset'] == asset]
+            utxo_list = []
+            for utxo in unspent_list:
+                if utxo['asset'] == asset:
+                    utxo_list.append(utxo)
             unspent_list = utxo_list
-        utxo_count = len(utxo_list)
+        utxo_count = len(unspent_list)
         print(f'listunspent count: {utxo_count}')
         json_str = json.dumps(unspent_list,
                               default=convert_to_json, indent=2)
@@ -282,15 +304,21 @@ def main():
         if not args.asset:
             logging.error(' empty asset.')
             sys.exit(1)
+        label_map, asset_map = create_asset_map(rpc, config)
         btc_asset = get_btc_asset(config)
         is_btc = True if args.asset in ['bitcoin', btc_asset] else False
 
         asset = args.asset
-        if asset == 'JPY':
-            asset = get_jpy_asset(config, asset)
-            if (not asset) or (asset == 'JPY'):
-                print('The JPY asset is not defined on the config file.')
-                sys.exit(1)
+        if is_btc or (asset in asset_map):
+            pass
+        elif asset in label_map:
+            asset = label_map.get(asset)
+        elif not asset:
+            print('The asset is empty.')
+            sys.exit(1)
+        else:
+            print(f'The {asset} asset is not defined on the config file.')
+            sys.exit(1)
 
         if is_btc:
             amount = float(args.value)
