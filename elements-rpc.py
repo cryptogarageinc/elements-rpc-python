@@ -164,7 +164,7 @@ def create_command():
     subparsers.add_parser('lock_wallet', help='lock_wallet help')
 
     parser_chg_pass = subparsers.add_parser(
-        'change_wallet_passphrase', help='unlock_wallet help')
+        'change_wallet_passphrase', help='change_wallet_passphrase help')
     parser_chg_pass.add_argument('-p', '--passphrase', default='',
                                  help='old passphrase', required=False)
     parser_chg_pass.add_argument('-n', '--new-passphrase',
