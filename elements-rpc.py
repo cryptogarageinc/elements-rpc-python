@@ -260,15 +260,46 @@ def main():
             print('\n')
 
     elif args.command == 'get_balance':
-        _, asset_map = create_asset_map(rpc, config)
-        balance_map = rpc.getbalance(args.asset)
-        for label, balance in balance_map.items():
-            if label == 'bitcoin':
+        label_map, asset_map = create_asset_map(rpc, config, True)
+        btc_asset = get_btc_asset(config)
+        btc_label = label_map.get('bitcoin', 'bitcoin')
+
+        bitcoin_assets = ['bitcoin', btc_asset, btc_label]
+        target_assets = []
+        asset = args.asset
+        if not asset:
+            pass
+        if asset in bitcoin_assets:
+            target_assets.append('bitcoin')
+        else:
+            target_assets.append(asset)
+            if asset in label_map:
+                target_assets.append(label_map.get(asset, asset))
+            if asset in asset_map:
+                target_assets.append(asset_map.get(asset, asset))
+
+        def dump_balance(label, balance):
+            if label in bitcoin_assets:
                 print(f'{label}: {balance:.8f}')
             else:
                 label = asset_map.get(label, label)
                 amount = int(balance * COINBASE)
                 print(f'{label}: {amount}')
+
+        balance_map = rpc.getbalance('')
+        if not asset:
+            for label, balance in balance_map.items():
+                dump_balance(label, balance)
+        else:
+            found = False
+            for label, balance in balance_map.items():
+                if label in target_assets:
+                    found = True
+                    dump_balance(label, balance)
+            if not found:
+                balance_map = rpc.getbalance(args.asset)
+                for label, balance in balance_map.items():
+                    dump_balance(label, balance)
 
     elif args.command == 'listunspent':
         def convert_to_json(obj):
