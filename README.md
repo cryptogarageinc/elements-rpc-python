@@ -48,7 +48,13 @@ create configuration file on first.
     - wallet: (If you are using multiple wallet) wallet name.
     - passphrase: wallet passphrase. (for unlock_wallet)
   - assets: default asset id. (and label mapping)
-    - JPY: JPY asset id.
+    - Any set value field. Delete it if you do not need it.
+    - If you specify a label and asset ID in this field, even assets that are not labeled on elementsd can be treated as labels.
+    - If set in this field, the following command will not be able to send assets other than the set label.
+      - send
+        - If you specify the ID of the asset instead of the label, it is also available in these commands.
+    - If you do not define this field, you can only work with the assets that are labeled on elementsd.
+      - You can also send.
 
 ### support command
 
