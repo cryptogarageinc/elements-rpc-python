@@ -3,7 +3,7 @@
 ## install
 
  - for windows bat
-   1. double click `0_install.bat`
+   1. double click `100_install.bat`
 
  - for python
    ```
@@ -125,30 +125,30 @@ create configuration file on first.
 Parameter is set to default value.
 
   - lock wallet
-    1. double click `99_lock_wallet.bat`
+    1. double click `199_lock_wallet.bat`
 
   - unlock wallet
-    1. double click `98_unlock_wallet.bat`
+    1. double click `198_unlock_wallet.bat`
 
   - get address
-    1. double click `1_get_address_jpy.bat`
+    1. double click `101_get_address_jpy.bat`
 
   - list addresses
-    1. double click `2_list_addresses_jpy.bat`
+    1. double click `102_list_addresses_jpy.bat`
 
   - get balance
-    1. double click `3_get_balance.bat`
+    1. double click `103_get_balance.bat`
 
   - listunspent (JPY asset)
-    1. double click `4_listunspent_jpy.bat`
+    1. double click `104_listunspent_jpy.bat`
     2. view `listunspent-jpy.json`
 
   - sign
     1. drag transaction file
-    2. drop file to `3_sign_tx.bat`
+    2. drop file to `103_sign_tx.bat`
     3. view `sign_tx.txt`
 
     Alternative:
     1. rename transaction file to `sign_tx.txt`
-    2. double click `3_sign_tx.bat`
+    2. double click `103_sign_tx.bat`
     3. view `sign_tx.txt`
